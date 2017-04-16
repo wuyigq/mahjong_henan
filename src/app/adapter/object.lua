@@ -6,7 +6,7 @@ function new(cls, ...)
 end
 
 function delete(obj)
-	if type(obj.dtor) == "function" then
+	if obj and type(obj.dtor) == "function" then
 		obj:dtor()
 	end
 end
@@ -20,3 +20,11 @@ end
 function Node:setPickable(flag)
 	--TODO self:setTouchEnabled(flag)
 end
+
+function Node:setAlign(align)
+	--TODO
+end
+
+kEffectPlayer = {play = function( ... )
+	-- body
+end}

@@ -71,7 +71,7 @@ function CardView:ctor(seat)
 	}
 
 	--test
-	self:onDealCardBd(self.m_seat, nil, {1,1,1,1,2,2,2,2,3,3,3,3,4})
+	self:onDealCardBd(self.m_seat, nil, {1,1,1,1,2,2,2,2,3,3,3,3,4,4})
 end
 
 function CardView:playOutOneCard(index, value)
@@ -174,11 +174,20 @@ function CardView:onDealCardStep(cardIndexStart, cardIndexEnd)
 		end 
 		local startY = -80;
 		for k,v in pairs(cardAnimTb) do
-			local anim = v:addPropTranslate(0, kAnimNormal, 200, 0, 0, 0, startY, 0);
-			anim:setDebugName("CardView.onDealCardStep")
-			anim:setEvent(nil, function()
-				v:removeProp(0)
-			end)
+			-- local anim = v:addPropTranslate(0, kAnimNormal, 200, 0, 0, 0, startY, 0);
+			-- anim:setDebugName("CardView.onDealCardStep")
+			-- anim:setEvent(nil, function()
+			-- 	v:removeProp(0)
+			-- end)
+			transition.moveBy(v, {x = 0;
+				y = startY;
+				time = 200;
+				-- easing = "SINEIN";
+				onComplete = function ()
+					transition.stopTarget(v)
+				end
+			});
+
 		end
 	end
 end
@@ -611,7 +620,7 @@ function CardView:switchAnGangToMing()
 			local secondCard = v.cards[2]
 			local extraBgFile = self:formatExtraCardBg(self.m_extraCardBgFile, k, 4)
 			local mingCard = new(Card, secondCard:getValue(), extraBgFile, self.m_extraCardImgFileReg, nil, self.m_seat, "out")
-				:addTo(self, secondCard:getLevel() + 3)
+				:addTo1(self, secondCard:getLevel() + 3)
 				:setBgAlign(self.m_cardAlign)
 
 			mingCard:setScale(self.m_extraCardScale)
@@ -997,9 +1006,11 @@ function CardView:createOneHandCard(value, isAddCard, idx)
 	end
 	if self.m_seat ~= MahjongConst.kSeatMine and value ~= 0 then value = 0 end
 	local card = new(Card, value, self.m_handCardBgFile, self.m_handCardImgFileReg, nil, self.m_seat, "hand")
-			:setOriginPos(self.m_handCardPosX + diff.x, self.m_handCardPosY + diff.y)
+			-- :setOriginPos(self.m_handCardPosX + diff.x, self.m_handCardPosY + diff.y)
 			:setBgAlign(self.m_cardAlign)
 			:setSequence(idx)
+			:setPosition(100, 100)
+	print("--------------------------------------------------createOneHandCard-", self.m_handCardPosX + diff.x, self.m_handCardPosY + diff.y)
 	card:setScale(self.m_handCardScale)
 	card:shiftCardMove(0, 6)
 
@@ -1011,7 +1022,7 @@ function CardView:createOneHandCard(value, isAddCard, idx)
 	if self.m_seat == MahjongConst.kSeatRight then
 		self.m_cardLayer = self.m_cardLayer - 1
 	end
-	card:addTo(self, self.m_cardLayer)
+	card:addTo1(self, self.m_cardLayer)
 	if self.m_seat == MahjongConst.kSeatMine then
 		card:setEventTouch(self, self.onTouch);
 		card:setLevel(41)
@@ -1047,7 +1058,7 @@ function CardView:createOneExtraHandCard(value, bgFile, imgFileReg, isLastCard)
 	local index = (num - 1) % 3 + 1
 	local card = new(Card, value, bgFile, imgFileReg, self:getExtraCardIndex(groupNum, index), self.m_seat, "hand")
 		:setOriginPos(self.m_handCardPosX + self.m_extraToHandDiff.x + diff.x, self.m_handCardPosY + self.m_extraToHandDiff.y + diff.y)
-		:addTo(self, self.m_extraCardLayer)
+		:addTo1(self, self.m_extraCardLayer)
 		:setBgAlign(self.m_cardAlign)
 
 	table.insert(self.m_cardsVector, card)
@@ -1090,7 +1101,7 @@ function CardView:createOneExtraHandHuCard(value, bgFile, imgFileReg, isLastCard
 	local index = (num - 1) % 3 + 1
 	local card = new(Card, value, bgFile, imgFileReg, self:getExtraCardIndex(groupNum, index), self.m_seat, cardType)
 		:setOriginPos(self.m_handCardPosX + self.m_extraToHandDiff.x + diff.x, self.m_handCardPosY + self.m_extraToHandDiff.y + diff.y)
-		:addTo(self, self.m_extraCardLayer)
+		:addTo1(self, self.m_extraCardLayer)
 		:setBgAlign(self.m_cardAlign)
 
 	table.insert(self.m_cardsVector, card)
@@ -1173,7 +1184,7 @@ function CardView:createOneOutCard(value)
 	local diffY = bgDiffY[self.m_outCardLine] and bgDiffY[self.m_outCardLine][newNowNum] or 0 
 	local card = new(Card, value, bgFile, self.m_outCardImgFileReg, cardImgIdx, self.m_seat, "out")
 			:setOriginPos(self.m_outCardPosX + diffX, self.m_outCardPosY + diffY)
-			:addTo(self, self.m_outCardLayer)
+			:addTo1(self, self.m_outCardLayer)
 			:setBgAlign(self.m_cardAlign)
 
 	-- card:setScale(self.m_outCardScale)
@@ -1313,7 +1324,7 @@ function CardView:createAnGangCardTb(opTable, cards, cardType, operateValue, gro
         if k ~= 4 then
             card = new(Card, 0, self:formatExtraCardBg(self.m_extraAnGangImageFile, groupNum, k), nil, nil, self.m_seat, cardType)
                 :setOriginPos(self.m_extraCardPosX + self.m_extraToHandDiff.x, self.m_extraCardPosY + self.m_extraToHandDiff.y)
-                :addTo(self, self.m_extraCardLayer)
+                :addTo1(self, self.m_extraCardLayer)
                 :setBgAlign(self.m_cardAlign)
                 :setValue(value)
                 
@@ -1334,7 +1345,7 @@ function CardView:createAnGangCardTb(opTable, cards, cardType, operateValue, gro
             card = new(Card, value, self:formatExtraCardBg(self.m_extraCardBgFile, groupNum, k), self.m_extraCardImgFileReg, self:getExtraCardIndex(groupNum, k), self.m_seat, cardType)
             local curLayer = self.m_extraCardLayer + 3
             card:setBgAlign(self.m_cardAlign)
-                :addTo(self, curLayer)
+                :addTo1(self, curLayer)
                 :setValue(value)
                 
             card:setScale(self.m_extraCardScale)
@@ -1363,7 +1374,7 @@ function CardView:createOneExtraCardTb(opTable)
 		for k,value in ipairs(opTable.cards) do
 			local card = new(Card, value, self:formatExtraCardBg(self.m_extraCardBgFile, groupNum, k), self.m_extraCardImgFileReg, self:getExtraCardIndex(groupNum, k), self.m_seat, cardType)
 				:setOriginPos(self.m_extraCardPosX + self.m_extraToHandDiff.x, self.m_extraCardPosY + self.m_extraToHandDiff.y)
-				:addTo(self, self.m_extraCardLayer)
+				:addTo1(self, self.m_extraCardLayer)
 				:setBgAlign(self.m_cardAlign)
 
 			card:setScale(self.m_extraCardScale)
@@ -1382,7 +1393,7 @@ function CardView:createOneExtraCardTb(opTable)
 			if k ~= 4 then
 				card = new(Card, value, self:formatExtraCardBg(self.m_extraCardBgFile, groupNum, k), self.m_extraCardImgFileReg, self:getExtraCardIndex(groupNum, k), self.m_seat, cardType)
 					:setOriginPos(self.m_extraCardPosX + self.m_extraToHandDiff.x, self.m_extraCardPosY + self.m_extraToHandDiff.y)
-					:addTo(self, self.m_extraCardLayer)
+					:addTo1(self, self.m_extraCardLayer)
 					:setBgAlign(self.m_cardAlign)
 
 				card:setScale(self.m_extraCardScale)
@@ -1393,7 +1404,7 @@ function CardView:createOneExtraCardTb(opTable)
 			else
 				local curLayer = self.m_extraCardLayer + 3
 				card = new(Card, value, self:formatExtraCardBg(self.m_extraCardBgFile, groupNum, k), self.m_extraCardImgFileReg, self:getExtraCardIndex(groupNum, k), self.m_seat, cardType)
-					:addTo(self, curLayer)
+					:addTo1(self, curLayer)
 					:setBgAlign(self.m_cardAlign)
 
 				card:setScale(self.m_extraCardScale)
@@ -1426,7 +1437,7 @@ function CardView:switchPengToBuGang(card)
 			local secondCard = v.cards[2]
 			local extraBgFile = self:formatExtraCardBg(self.m_extraCardBgFile, k, 4)
 			local buCard = new(Card, card, extraBgFile, self.m_extraCardImgFileReg, k*3-1, self.m_seat, cardType)
-				:addTo(self, secondCard:getLevel())
+				:addTo1(self, secondCard:getLevel())
 				:setBgAlign(self.m_cardAlign)
 
 			buCard:setScale(self.m_extraCardScale)
@@ -1950,15 +1961,15 @@ end
 function CardView:createTips()
     if not self.tips then
         self.tips = new(Image, _gamePathPrefix .. "mahjong/room/tips_bg.png", nil, nil, 32, 32, 32, 32)
-        	:addTo(self)
+        	:addTo1(self)
         self.tips:setLevel(100)
 
         local txt = new(Image, _gamePathPrefix .. "mahjong/room/no_tingyong_out.png")
-        	:addTo(self.tips)
+        	:addTo1(self.tips)
         local w, h = txt:getSize()
         self.tips:setSize(w+100, nil)
         w, h = self.tips:getSize()
-        --TODO txt:setAlign(kAlignCenter)
+        txt:setAlign(kAlignCenter)
         self.tips:setPos((System.getScreenScaleWidth()-w)/2, (System.getScreenScaleHeight()-h+250)/2)
     end
 end
@@ -2431,7 +2442,7 @@ function CardView:createOneTingHandCard(value, bgFile, imgFileReg, isLastCard)
 	local index = (num - 1) % 3 + 1
 	local card = new(Card, value, bgFile, imgFileReg, self:getExtraCardIndex(groupNum, index), self.m_seat, "hand")
 		:setOriginPos(self.m_handCardPosX + self.m_extraToHandDiff.x + diff.x, self.m_handCardPosY + self.m_extraToHandDiff.y + diff.y)
-		:addTo(self, self.m_extraCardLayer)
+		:addTo1(self, self.m_extraCardLayer)
 		:setBgAlign(self.m_cardAlign)
 
 	table.insert(self.m_cardsVector, card)

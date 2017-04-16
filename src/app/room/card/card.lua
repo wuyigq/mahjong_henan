@@ -138,7 +138,7 @@ function Card:scaleCardTo(scaleWidth, scaleHeight)
 		local width, height = self.m_card:getOriginSize()
 		width = width * (scaleWidth or 1)
 		height = height * (scaleHeight or 1) 
-		self.m_card:size(width, height)
+		self.m_card:setContentSize(width, height)
 	end
 	return self
 end
@@ -149,19 +149,19 @@ function Card:scaleBgTo(scaleWidth, scaleHeight)
 		local width, height = self.m_bgCard:getOriginSize()
 		width = width * (scaleWidth or 1)
 		height = height * (scaleHeight or 1) 
-		self.m_bgCard:size(width, height)
+		self.m_bgCard:setContentSize(width, height)
 	end
 	if self.laiziAnimImage then
 		local width, height = self.laiziAnimImage:getOriginSize()
 		width = width * (scaleWidth or 1)
 		height = height * (scaleHeight or 1) 
-		self.laiziAnimImage:size(width, height)
+		self.laiziAnimImage:setContentSize(width, height)
 	end
 	if self.laiziAnimBg then
 		local width, height = self.laiziAnimBg:getOriginSize()
 		width = width * (scaleWidth or 1)
 		height = height * (scaleHeight or 1) 
-		self.laiziAnimBg:size(width, height)
+		self.laiziAnimBg:setContentSize(width, height)
 	end
 	return self
 end
@@ -179,12 +179,15 @@ function Card:setOriginScale(bgScale, cardScale)
 end
 
 function Card:getOriginSize()
-	return self.m_bgCard:getContentSize()
+	local size = self.m_bgCard:getContentSize()
+	return size.width, size.height
 end
 
 -- 获取bgCard的size
 function Card:getSize()
-	return self.m_bgCard:getContentSize()
+	local size = self.m_bgCard:getContentSize()
+	return size.width, size.height
+	-- return self.m_bgCard:getContentSize()
 end
 
 -- 用于相对初始位置做平移
@@ -256,8 +259,8 @@ function Card:resetImageByValueAndType(value, _, bgFile, seat)
 	value = value or 0
 	if bgFile then
 		self.m_bgFile = bgFile
-		self.m_bgCard:setFile(card_pin_map[self.bgPath .. bgFile])
-		self.m_bgCard:size(self.m_bgCard:getResSize())
+		self.m_bgCard:setFile(self.bgPath .. bgFile)
+		self.m_bgCard:setContentSize(self.m_bgCard:getResSize())
 		self.m_bgCard:setVisible(true)
 	end
 	if value > 0 then
@@ -296,7 +299,7 @@ end
 
 function Card:shiftCardMove(x, y)
 	if self.m_card then
-		self.m_card:pos(x, y)
+		self.m_card:setPosition(x, y)
 	end
 	return self
 end
@@ -336,7 +339,7 @@ end
 
 -- 只有自己才会用
 function Card:gaiPai(fileName)
-	self.m_bgCard:setFile(card_pin_map[self.bgPath .. fileName])
+	self.m_bgCard:setFile(self.bgPath .. fileName)
 	self.isGaiPai = true
 	if self.m_card then
 		self.m_card:setVisible(false)
@@ -344,7 +347,7 @@ function Card:gaiPai(fileName)
 end
 
 function Card:gaiPaiOver()
-	self.m_bgCard:setFile(card_pin_map[self.bgPath .. self.m_bgFile])
+	self.m_bgCard:setFile(self.bgPath .. self.m_bgFile)
 	if self.m_card then
 		self.m_card:setVisible(true)
 	end
@@ -414,14 +417,14 @@ function Card:setColor(c)
 	end
 end
 
-function Card:addTo(parent, level)
-	self:addTo(parent)
+function Card:addTo1(parent, level)
+	self.addTo(self, parent)
 	if level then self:setLevel(level) end
 	return self
 end
 
 function Card:pos(x, y)
-	self:pos(x, y)
+	self:setPosition(x, y)
 	return self
 end
 
@@ -459,7 +462,7 @@ function Card:dtor(x, y)
 end
 
 function Card:setEventTouch(...)
-	self.m_bgCard:setEventTouch(...)
+	-- self.m_bgCard:setEventTouch(...)
 end
 
 function Card:checkTouchID(id)
@@ -502,7 +505,7 @@ function Card:clone()
 				:setBgAlign(self.m_bgAlign)
 
 	card.m_card:pos(self.m_card:getPos())
-	card.m_card:size(self.m_card:getContentSize())
+	card.m_card:setContentSize(self.m_card:getContentSize())
 
 	return card
 end
@@ -553,8 +556,8 @@ function Card:getCardPathByValueAndIndex(seat, value, index, type)
 end
 
 ---------------------------------------
-CardImage = class("CardImage", function()
-	return display.newSprite()
+CardImage = class("CardImage", function(file)
+	return display.newSprite(file)
 end)
 
 function CardImage:ctor()
@@ -570,5 +573,8 @@ function CardImage:setColor(r, g, b)
 	self.super.setColor(self, cc.c3b(r, g, b))
 end
 
+function CardImage:setFile(file)
+	self:setSpriteFrame(file)
+end
 -- CardImage.addPropTranslateEase = DrawingBase.addAtomPropTranslateEase
 return Card

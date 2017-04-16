@@ -90,10 +90,10 @@ end
 --设置/获取/自减剩余牌数
 function MahjongBaseData:setLeftCard(leftCard)
     if leftCard ~= nil and leftCard ~= self.leftCard then
-        local action = MahjongMechineConfig.ACTION_NS_LEFT_CARD
+        -- local action = MahjongMechineConfig.ACTION_NS_LEFT_CARD
         local myID = UserBaseInfoIsolater.getInstance():getUserId()
         self.leftCard = leftCard;
-        MechineManage.getInstance():receiveAction(action, {leftCard=leftCard}, myID)
+        -- MechineManage.getInstance():receiveAction(action, {leftCard=leftCard}, myID)
 
         self:checkFroceHuByLeftCard()
     end
@@ -260,8 +260,8 @@ function MahjongBaseData:getHuRequirement()
 end
 function MahjongBaseData:setHuRequirement(requirement)
     self.m_requirement = requirement or {}
-    local action = MahjongMechineConfig.ACTION_NS_REQUIREMENT
-    MechineManage.getInstance():receiveAction(action, {data = self.m_requirement})
+    -- local action = MahjongMechineConfig.ACTION_NS_REQUIREMENT
+    -- MechineManage.getInstance():receiveAction(action, {data = self.m_requirement})
 end
 
 --这个接口可以用来保存数据到文件

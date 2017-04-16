@@ -5,9 +5,9 @@ kAnimRepeat	= 1;
 --- anim完成一次后倒序一次，如此反复。
 kAnimLoop	    = 2;
 
--- local scheduler = require("framework.scheduler")
+local scheduler = require("cocos.framework.scheduler")
 
-AnimBase = {};
+AnimBase = class("AnimBase");
 
 function AnimBase:getID()
 	return self.m_animID;
@@ -24,7 +24,9 @@ function AnimBase:ctor(animType, startValue, endValue, duration, delay)
 	self.m_delay = delay;
 	self.count = 0
 
-	self.m_animID = scheduler.scheduleGlobal (handler(self, self.onEvent), duration);	
+	self.m_animID = scheduler.scheduleGlobal (function()
+		self:onEvent()
+	end, duration/1000);	
 	self.m_eventCallback = {};
 end
 
@@ -74,9 +76,9 @@ AnimBase.onEvent = function(self)
 	if self.m_animType == kAnimNormal and self.m_animID then
 		scheduler.unscheduleGlobal(self.m_animID)
 	end	
-	self.count = self.m_count + 1
+	self.count = self.count + 1
 	if self.m_eventCallback.func then
-		 self.m_eventCallback.func(self.m_eventCallback.obj, self.m_animType, self.m_animID, self.m_count);
+		 self.m_eventCallback.func(self.m_eventCallback.obj, self.m_animType, self.m_animID, self.count);
 	end
 end
 
@@ -87,4 +89,21 @@ AnimIndex = class("AnimIndex", AnimBase);
 
 AnimIndex.ctor = function(self, animType, startValue, endValue, duration, res, delay)
 	anim_create_index(0, self.m_animID, animType, startValue, endValue, duration, res.m_resID,delay or 0); 
+end
+
+AnimFactory = {}
+
+function AnimFactory.createAnimDouble(...)
+	local anim = new(AnimBase, ...)
+	return anim
+end
+
+function AnimFactory.createAnimInt(...)
+	local anim = new(AnimBase, ...)
+	return anim
+end
+
+function AnimFactory.createAnimIndex(...)
+	local anim = new(AnimIndex, ...)
+	return anim
 end
